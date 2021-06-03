@@ -14,7 +14,14 @@ def construct_report(path: Path):
         expenses = []
 
         for row in csv_reader:
-            money = row[2]
+            try:
+                money = row[2]
+                transfer_type = row[3]
+                name = row[5]
+            except IndexError:
+                print(f"Warning! Corrupted csv file please check, failed row: {row} (index out of bounds)")
+                continue
+
             money = money.replace("+", "")
             if not money.replace(",", "", 1).replace("-", "", 1).isdigit():
                 continue
@@ -23,8 +30,6 @@ def construct_report(path: Path):
 
             date = [int(number) for number in reversed(row[1].split("."))]
             date = datetime.datetime(*date)
-
-            transfer_type = row[3]
 
             # This could of been done dynamically with something like "for name, age in mydict.items():",
             # but it will be slower
@@ -39,8 +44,6 @@ def construct_report(path: Path):
             else:
                 transfer_type = None
 
-            name = row[5]
-
             expense = Expense(name, transfer_type, money, date, False)
 
             for fuel_station in FUEL_STATIONS:
@@ -54,8 +57,7 @@ def construct_report(path: Path):
     return expenses
 
 
-def read_monthly(expenses: [], expense_tracking: ExpenseTracking):
-    total = 0
+def sort_expenses(expenses: [], expense_tracking: ExpenseTracking):
     for expense in expenses:
 
         if expense.transfer_type != TransferType.CARD and expense.transfer_type != TransferType.MOBILEPAY:
@@ -70,18 +72,19 @@ def read_monthly(expenses: [], expense_tracking: ExpenseTracking):
         else:
             expense_tracking.add_high(expense)
 
-    print(total + 1487)
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("must provide path argument")
-        exit()
+        exit(0)
 
     csv_file = Path(sys.argv[1])
+    if not csv_file.exists():
+        print("CSV file does not exist. Check path.")
+        exit(1)
 
     transactions = construct_report(csv_file)
     monthly_expenses = ExpenseTracking()
+    sort_expenses(transactions, monthly_expenses)
 
-    read_monthly(transactions, monthly_expenses)
     print(monthly_expenses)
