@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from constants import TransferType
 
 
@@ -22,6 +22,7 @@ class ExpenseTracking:
         self.__high = list()
         self.__fuel = list()
         self.__total = 0.0
+        self.__details_format = "{0:30}|{1:10}|{2:11}"
 
     def __str__(self):
         low_total = self.__calculate_total(self.__low)
@@ -46,6 +47,23 @@ class ExpenseTracking:
                f"Total: {fuel_total}\n" \
                f"\n" \
                f"Total: {self.__total}"
+
+    def get_details(self, expense_list: list, sort_by=None):
+        sort_types = ["oldest", "newest", "high", "low"]
+        if sort_by:
+            assert sort_by in sort_types, "Sort type must be one of the following: oldest, newest, high, low or None"
+
+        total = self.__calculate_total(expense_list)
+        formatted = self.__details_format.format("Name", "Money", "Date") + "\n"
+
+        expense_list.sort()
+
+
+        for expense in expense_list:
+            formatted_tuple = (expense.name, expense.money, expense.date.strftime("%d-%m-%y"))
+            formatted += self.__details_format.format(*formatted_tuple) + "\n"
+
+        return f"Low spending:\n{formatted}\nTotal: {total}\nAmount of purchases: {len(expense_list)}"
 
     def __calculate_total(self, expenses: list):
         total = 0

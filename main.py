@@ -3,7 +3,7 @@ import sys
 import datetime
 from pathlib import Path
 
-from data_types import ExpenseTracking, Expense
+from expense_tracking import ExpenseTracking, Expense
 from constants import TransferType, FUEL_STATIONS
 
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         exit(1)
 
     transactions = construct_report(csv_file)
-    monthly_expenses = ExpenseTracking()
-    sort_expenses(transactions, monthly_expenses)
+    expense_tracking = ExpenseTracking()
+    sort_expenses(transactions, expense_tracking)
 
-    print(monthly_expenses)
+    print(expense_tracking.get_details(expense_tracking.low))
